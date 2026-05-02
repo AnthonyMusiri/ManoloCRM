@@ -1,7 +1,18 @@
+# Archivos de compilación
 bin/
 obj/
+
+# Base de datos local (no se sube)
 *.db
 *.db-shm
 *.db-wal
-.vs/
-Properties/launchSettings.json
+
+# Configuración personal de VS Code
+.vscode/
+
+# Variables de entorno y secretos
+appsettings.Development.json
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
