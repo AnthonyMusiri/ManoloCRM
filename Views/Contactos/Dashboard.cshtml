@@ -1,0 +1,133 @@
+@{
+ViewData["Title"] = "Dashboard";
+int total = ViewBag.TotalContactos ?? 0;
+double promedio = ViewBag.EdadPromedio ?? 0;
+var masJoven = ViewBag.MasJoven as ManoloCRM.Models.Contacto;
+var mayorEdad = ViewBag.MayorEdad as ManoloCRM.Models.Contacto;
+var rangos = ViewBag.RangoEdades as Dictionary<string, int> ?? new Dictionary<string, int>();
+var recientes = ViewBag.Recientes as List<ManoloCRM.Models.Contacto> ?? new();
+int maxRango = rangos.Any() ? rangos.Values.Max() : 1;
+if (maxRango == 0) maxRango = 1;
+}
+<div class="page-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</div>
+<p class="page-subtitle">Resumen general del sistema de contactos</p>
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-number">@total</div>
+            <div class="stat-label">Total Contactos</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="bi bi-calendar2-heart"></i></div>
+            <div class="stat-number">@promedio</div>
+            <div class="stat-label">Edad Promedio</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
+            @if (masJoven != null) {
+                <div class="stat-number">@masJoven.Edad</div>
+                <div class="stat-label">Más joven: @masJoven.Nombre</div>
+            } else {
+                <div class="stat-number">--</div>
+                <div class="stat-label">Sin datos</div>
+            }
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="bi bi-award-fill"></i></div>
+            @if (mayorEdad != null) {
+                <div class="stat-number">@mayorEdad.Edad</div>
+                <div class="stat-label">Mayor edad: @mayorEdad.Nombre</div>
+            } else {
+                <div class="stat-number">--</div>
+                <div class="stat-label">Sin datos</div>
+            }
+        </div>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-bar-chart-fill me-2"></i>Distribución por Rango de Edad
+            </div>
+            <div class="card-body p-4">
+                @if (total == 0) {
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-2"></i>
+                        <p class="mt-2">Sin datos para mostrar</p>
+                    </div>
+                } else {
+                    @foreach (var r in rangos) {
+                        var pct = (int)((r.Value * 100.0) / maxRango);
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-semibold text-muted small">@r.Key años</span>
+                                <span class="badge bg-primary rounded-pill">@r.Value persona(s)</span>
+                            </div>
+                            <div class="progress" style="height:10px;border-radius:10px;">
+                                <div class="progress-bar bg-primary" style="width:@pct%;border-radius:10px;"></div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+<div class="col-md-5">
+    <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clock-history me-2"></i>Registros Recientes</span>
+            <a asp-action="Index" class="btn btn-light btn-sm">Ver todos</a>
+        </div>
+        <div class="card-body p-0">
+            @if (!recientes.Any()) {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-2"></i>
+                    <p class="mt-2">Sin contactos registrados</p>
+                </div>
+            } else {
+                <ul class="list-group list-group-flush">
+                    @foreach (var c in recientes) {
+                        <li class="list-group-item d-flex align-items-center gap-3 py-3">
+                            <div class="avatar-initials">@c.Nombre[0]@c.Apellidos[0]</div>
+                            <div>
+                                <div class="fw-semibold">@c.NombreCompleto</div>
+                                <div class="text-muted small">
+                                    <i class="bi bi-card-text me-1"></i>@c.Cedula
+                                    &nbsp;|&nbsp;<i class="bi bi-calendar me-1"></i>@c.Edad años
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+        @if (total > 0) {
+            <div class="card-footer text-center">
+                <a asp-action="Crear" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus me-1"></i>Agregar contacto
+                </a>
+            </div>
+        }
+    </div>
+</div>
+</div>
+<style>
+.stat-card{border-radius:16px;padding:24px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);}
+.stat-card::before{content:"";position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.12);}
+.stat-blue{background:linear-gradient(135deg,#1967d2,#4285f4);}
+.stat-purple{background:linear-gradient(135deg,#7c3aed,#a855f7);}
+.stat-green{background:linear-gradient(135deg,#059669,#34d399);}
+.stat-orange{background:linear-gradient(135deg,#d97706,#fbbf24);}
+.stat-icon{font-size:2rem;opacity:.85;margin-bottom:8px;}
+.stat-number{font-size:2.2rem;font-weight:800;line-height:1;}
+.stat-label{font-size:.82rem;opacity:.9;margin-top:4px;}
+.avatar-initials{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1967d2,#4285f4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;text-transform:uppercase;}
+</style>

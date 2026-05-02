@@ -1,0 +1,89 @@
+@model ManoloCRM.Models.Contacto
+@{ ViewData["Title"] = "Nuevo Contacto"; }
+<div class="page-title"><i class="bi bi-person-plus-fill me-2"></i>Registrar Nuevo Contacto</div>
+<p class="page-subtitle">Complete el formulario con los datos del contacto</p>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-clipboard-plus me-2"></i>Datos del Contacto</div>
+            <div class="card-body p-4">
+                <form asp-action="Crear" method="post">
+                    @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label asp-for="Cedula" class="form-label fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                        <input asp-for="Cedula" class="form-control" placeholder="Número de cédula" />
+                    </div>
+                    <span asp-validation-for="Cedula" class="text-danger small"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="Nombre" class="form-control" placeholder="Nombre(s)" />
+                        </div>
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Apellidos" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="Apellidos" class="form-control" placeholder="Apellidos" />
+                        </div>
+                        <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="FechaNacimiento" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                            <input asp-for="FechaNacimiento" class="form-control" type="date" />
+                        </div>
+                        <span asp-validation-for="FechaNacimiento" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="Telefono" class="form-control" placeholder="Ej: 300 123 4567" />
+                        </div>
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Direccion" class="form-label fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                        <input asp-for="Direccion" class="form-control" placeholder="Dirección completa" />
+                    </div>
+                    <span asp-validation-for="Direccion" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Guardar Contacto
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card" style="background:#f0f7ff;border:none;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Información</h6>
+            <p class="text-muted small mb-2">La <strong>edad</strong> se calculará automáticamente a partir de la fecha de nacimiento.</p>
+            <p class="text-muted small mb-0">Todos los campos son <strong>obligatorios</strong>.</p>
+        </div>
+    </div>
+</div>
+</div>
