@@ -1,17 +1,41 @@
+@* ============================================================
+   DASHBOARD - Vista principal después del login
+   Muestra estadísticas generales del sistema de contactos
+   Los datos vienen del método Dashboard() en ContactosController
+   ============================================================ *@
+
 @{
-ViewData["Title"] = "Dashboard";
-int total = ViewBag.TotalContactos ?? 0;
-double promedio = ViewBag.EdadPromedio ?? 0;
-var masJoven = ViewBag.MasJoven as ManoloCRM.Models.Contacto;
-var mayorEdad = ViewBag.MayorEdad as ManoloCRM.Models.Contacto;
-var rangos = ViewBag.RangoEdades as Dictionary<string, int> ?? new Dictionary<string, int>();
-var recientes = ViewBag.Recientes as List<ManoloCRM.Models.Contacto> ?? new();
-int maxRango = rangos.Any() ? rangos.Values.Max() : 1;
-if (maxRango == 0) maxRango = 1;
+    ViewData["Title"] = "Dashboard";
+
+    @* ── Recuperar datos enviados desde el controlador via ViewBag ── *@
+    int total        = ViewBag.TotalContactos ?? 0;
+    double promedio  = ViewBag.EdadPromedio ?? 0;
+
+    @* Castear a Contacto para poder acceder a sus propiedades *@
+    var masJoven  = ViewBag.MasJoven  as ManoloCRM.Models.Contacto;
+    var mayorEdad = ViewBag.MayorEdad as ManoloCRM.Models.Contacto;
+
+    @* Diccionario con rangos de edad y cantidad de personas en cada uno *@
+    var rangos    = ViewBag.RangoEdades as Dictionary<string, int>
+                   ?? new Dictionary<string, int>();
+
+    var recientes = ViewBag.Recientes as List<ManoloCRM.Models.Contacto>
+                   ?? new();
+
+    @* Valor máximo del diccionario para calcular el % de las barras
+       Se usa como referencia: la barra más larga = 100% *@
+    int maxRango = rangos.Any() ? rangos.Values.Max() : 1;
+    if (maxRango == 0) maxRango = 1; // Evitar división por cero
 }
+
 <div class="page-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</div>
 <p class="page-subtitle">Resumen general del sistema de contactos</p>
+
+@* ── TARJETAS DE ESTADÍSTICAS ─────────────────────────────────
+   Cada tarjeta muestra un dato clave con color diferente *@
 <div class="row g-4 mb-4">
+
+    @* Total de contactos registrados *@
     <div class="col-md-3">
         <div class="stat-card stat-blue">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
@@ -19,6 +43,8 @@ if (maxRango == 0) maxRango = 1;
             <div class="stat-label">Total Contactos</div>
         </div>
     </div>
+
+    @* Promedio de edad de todos los contactos *@
     <div class="col-md-3">
         <div class="stat-card stat-purple">
             <div class="stat-icon"><i class="bi bi-calendar2-heart"></i></div>
@@ -26,6 +52,8 @@ if (maxRango == 0) maxRango = 1;
             <div class="stat-label">Edad Promedio</div>
         </div>
     </div>
+
+    @* Contacto con la fecha de nacimiento más reciente (más joven) *@
     <div class="col-md-3">
         <div class="stat-card stat-green">
             <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
@@ -38,6 +66,8 @@ if (maxRango == 0) maxRango = 1;
             }
         </div>
     </div>
+
+    @* Contacto con la fecha de nacimiento más antigua (mayor edad) *@
     <div class="col-md-3">
         <div class="stat-card stat-orange">
             <div class="stat-icon"><i class="bi bi-award-fill"></i></div>
@@ -51,7 +81,12 @@ if (maxRango == 0) maxRango = 1;
         </div>
     </div>
 </div>
+
 <div class="row g-4">
+
+    @* ── GRÁFICO DE BARRAS POR RANGO DE EDAD ─────────────────
+       No usa librerías externas - son divs con width calculado
+       El ancho % se calcula: (cantidad / máximo) * 100 *@
     <div class="col-md-7">
         <div class="card h-100">
             <div class="card-header">
@@ -65,14 +100,18 @@ if (maxRango == 0) maxRango = 1;
                     </div>
                 } else {
                     @foreach (var r in rangos) {
+                        @* Calcular el porcentaje relativo al rango con más personas *@
                         var pct = (int)((r.Value * 100.0) / maxRango);
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="fw-semibold text-muted small">@r.Key años</span>
                                 <span class="badge bg-primary rounded-pill">@r.Value persona(s)</span>
                             </div>
+                            @* Barra de progreso: ancho proporcional al total del rango *@
                             <div class="progress" style="height:10px;border-radius:10px;">
-                                <div class="progress-bar bg-primary" style="width:@pct%;border-radius:10px;"></div>
+                                <div class="progress-bar bg-primary"
+                                     style="width:@pct%;border-radius:10px;">
+                                </div>
                             </div>
                         </div>
                     }
@@ -80,54 +119,86 @@ if (maxRango == 0) maxRango = 1;
             </div>
         </div>
     </div>
-<div class="col-md-5">
-    <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-clock-history me-2"></i>Registros Recientes</span>
-            <a asp-action="Index" class="btn btn-light btn-sm">Ver todos</a>
-        </div>
-        <div class="card-body p-0">
-            @if (!recientes.Any()) {
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-inbox fs-2"></i>
-                    <p class="mt-2">Sin contactos registrados</p>
-                </div>
-            } else {
-                <ul class="list-group list-group-flush">
-                    @foreach (var c in recientes) {
-                        <li class="list-group-item d-flex align-items-center gap-3 py-3">
-                            <div class="avatar-initials">@c.Nombre[0]@c.Apellidos[0]</div>
-                            <div>
-                                <div class="fw-semibold">@c.NombreCompleto</div>
-                                <div class="text-muted small">
-                                    <i class="bi bi-card-text me-1"></i>@c.Cedula
-                                    &nbsp;|&nbsp;<i class="bi bi-calendar me-1"></i>@c.Edad años
+
+    @* ── REGISTROS RECIENTES ──────────────────────────────────
+       Muestra los últimos 5 contactos agregados al sistema
+       Las iniciales del avatar se toman de Nombre[0] y Apellidos[0] *@
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history me-2"></i>Registros Recientes</span>
+                <a asp-action="Index" class="btn btn-light btn-sm">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recientes.Any()) {
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-2"></i>
+                        <p class="mt-2">Sin contactos registrados</p>
+                    </div>
+                } else {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var c in recientes) {
+                            <li class="list-group-item d-flex align-items-center gap-3 py-3">
+                                @* Avatar con las iniciales del contacto *@
+                                <div class="avatar-initials">
+                                    @c.Nombre[0]@c.Apellidos[0]
                                 </div>
-                            </div>
-                        </li>
-                    }
-                </ul>
+                                <div>
+                                    <div class="fw-semibold">@c.NombreCompleto</div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-card-text me-1"></i>@c.Cedula
+                                        &nbsp;|&nbsp;
+                                        <i class="bi bi-calendar me-1"></i>@c.Edad años
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            @if (total > 0) {
+                <div class="card-footer text-center">
+                    <a asp-action="Crear" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus me-1"></i>Agregar contacto
+                    </a>
+                </div>
             }
         </div>
-        @if (total > 0) {
-            <div class="card-footer text-center">
-                <a asp-action="Crear" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus me-1"></i>Agregar contacto
-                </a>
-            </div>
-        }
     </div>
 </div>
-</div>
+
+@* ── ESTILOS DE LAS TARJETAS DE ESTADÍSTICAS ─────────────────
+   Definidos aquí y no en _Layout porque solo los usa el Dashboard *@
 <style>
-.stat-card{border-radius:16px;padding:24px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);}
-.stat-card::before{content:"";position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.12);}
-.stat-blue{background:linear-gradient(135deg,#1967d2,#4285f4);}
-.stat-purple{background:linear-gradient(135deg,#7c3aed,#a855f7);}
-.stat-green{background:linear-gradient(135deg,#059669,#34d399);}
-.stat-orange{background:linear-gradient(135deg,#d97706,#fbbf24);}
-.stat-icon{font-size:2rem;opacity:.85;margin-bottom:8px;}
-.stat-number{font-size:2.2rem;font-weight:800;line-height:1;}
-.stat-label{font-size:.82rem;opacity:.9;margin-top:4px;}
-.avatar-initials{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1967d2,#4285f4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;text-transform:uppercase;}
+    /* Tarjeta base con círculo decorativo en la esquina */
+    .stat-card {
+        border-radius: 16px; padding: 24px; color: #fff;
+        position: relative; overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+    /* Círculo decorativo semitransparente en la esquina superior derecha */
+    .stat-card::before {
+        content: ""; position: absolute;
+        top: -20px; right: -20px;
+        width: 100px; height: 100px;
+        border-radius: 50%; background: rgba(255,255,255,.12);
+    }
+    /* Colores por tipo de tarjeta */
+    .stat-blue   { background: linear-gradient(135deg, #1967d2, #4285f4); }
+    .stat-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .stat-green  { background: linear-gradient(135deg, #059669, #34d399); }
+    .stat-orange { background: linear-gradient(135deg, #d97706, #fbbf24); }
+
+    .stat-icon   { font-size: 2rem; opacity: .85; margin-bottom: 8px; }
+    .stat-number { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .stat-label  { font-size: .82rem; opacity: .9; margin-top: 4px; }
+
+    /* Avatar circular con iniciales del contacto */
+    .avatar-initials {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: linear-gradient(135deg, #1967d2, #4285f4);
+        color: #fff; display: flex; align-items: center;
+        justify-content: center; font-weight: 700;
+        font-size: .9rem; flex-shrink: 0; text-transform: uppercase;
+    }
 </style>
