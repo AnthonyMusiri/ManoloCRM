@@ -1,86 +1,115 @@
+@* ============================================================
+   EDITAR CONTACTO
+   Formulario precargado con los datos actuales del contacto
+   Incluye validaciones en cliente y servidor
+   ============================================================ *@
+
 @model ManoloCRM.Models.Contacto
 @{ ViewData["Title"] = "Editar Contacto"; }
+
 <div class="page-title"><i class="bi bi-pencil-square me-2"></i>Editar Contacto</div>
 <p class="page-subtitle">Actualizando datos de <strong>@Model.NombreCompleto</strong></p>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card">
-            <div class="card-header"><i class="bi bi-person-gear me-2"></i>Actualizar Datos</div>
+            <div class="card-header">
+                <i class="bi bi-person-gear me-2"></i>Actualizar Datos
+            </div>
             <div class="card-body p-4">
                 <form asp-action="Editar" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
-                <div class="mb-3">
-                    <label asp-for="Cedula" class="form-label fw-semibold"></label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                        <input asp-for="Cedula" class="form-control" />
-                    </div>
-                    <span asp-validation-for="Cedula" class="text-danger small"></span>
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                    @* ── CÉDULA: solo números ── *@
+                    <div class="mb-3">
+                        <label asp-for="Cedula" class="form-label fw-semibold"></label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input asp-for="Nombre" class="form-control" />
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <input asp-for="Cedula" class="form-control"
+                                   placeholder="Solo números, sin puntos ni guiones"
+                                   inputmode="numeric"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                         </div>
-                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        <span asp-validation-for="Cedula" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="Apellidos" class="form-label fw-semibold"></label>
+
+                    @* ── NOMBRE Y APELLIDOS ── *@
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Nombre" class="form-control"
+                                       oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" />
+                            </div>
+                            <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Apellidos" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Apellidos" class="form-control"
+                                       oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" />
+                            </div>
+                            <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    @* ── FECHA Y TELÉFONO ── *@
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FechaNacimiento" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                @* min y max evitan fechas imposibles desde el calendario *@
+                                <input asp-for="FechaNacimiento" class="form-control"
+                                       type="date"
+                                       min="1900-01-01"
+                                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <span asp-validation-for="FechaNacimiento" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Telefono" class="form-control"
+                                       inputmode="numeric"
+                                       oninput="this.value = this.value.replace(/[^0-9\s]/g, '')" />
+                            </div>
+                            <span asp-validation-for="Telefono" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    @* ── DIRECCIÓN ── *@
+                    <div class="mb-3">
+                        <label asp-for="Direccion" class="form-label fw-semibold"></label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input asp-for="Apellidos" class="form-control" />
+                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                            <input asp-for="Direccion" class="form-control" />
                         </div>
-                        <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                        <span asp-validation-for="Direccion" class="text-danger small"></span>
                     </div>
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label asp-for="FechaNacimiento" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                            <input asp-for="FechaNacimiento" class="form-control" type="date" />
-                        </div>
-                        <span asp-validation-for="FechaNacimiento" class="text-danger small"></span>
+                    @* ── EDAD CALCULADA ── *@
+                    @* Se muestra como referencia, no es editable
+                       Se recalcula automáticamente al cambiar la fecha *@
+                    <div class="alert alert-info py-2 mb-4">
+                        <i class="bi bi-calculator me-2"></i>
+                        Edad actual calculada: <strong>@Model.Edad años</strong>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                            <input asp-for="Telefono" class="form-control" />
-                        </div>
-                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-circle me-1"></i>Guardar Cambios
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </a>
                     </div>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Direccion" class="form-label fw-semibold"></label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                        <input asp-for="Direccion" class="form-control" />
-                    </div>
-                    <span asp-validation-for="Direccion" class="text-danger small"></span>
-                </div>
-
-                <div class="alert alert-info py-2 mb-4">
-                    <i class="bi bi-calculator me-2"></i>
-                    Edad actual calculada: <strong>@Model.Edad años</strong>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-check-circle me-1"></i>Guardar Cambios
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-x-circle me-1"></i>Cancelar
-                    </a>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 </div>

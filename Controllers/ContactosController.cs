@@ -1,6 +1,6 @@
 // ============================================================
 // CONTROLADOR PRINCIPAL DE CONTACTOS
-// Maneja el CRUD completo 
+// Maneja el CRUD completo + Dashboard + Exportar CSV
 // Todas las acciones verifican sesión activa antes de ejecutar
 // ============================================================
 
@@ -29,6 +29,24 @@ namespace ManoloCRM.Controllers
         // Se llama al inicio de cada acción para proteger las rutas
         private bool EstaLogueado() =>
             HttpContext.Session.GetString("UsuarioLogueado") != null;
+
+        // ── MÉTODO AUXILIAR DE VALIDACIÓN DE FECHA ───────────
+        // Valida que la fecha de nacimiento sea razonable
+        // Se reutiliza en Crear y Editar para no repetir código
+        private void ValidarFecha(DateTime fecha)
+        {
+            if (fecha > DateTime.Today)
+                ModelState.AddModelError("FechaNacimiento",
+                    "La fecha de nacimiento no puede ser una fecha futura.");
+
+            if (fecha.Year < 1900)
+                ModelState.AddModelError("FechaNacimiento",
+                    "Ingresa una fecha de nacimiento válida.");
+
+            if (fecha < DateTime.Today.AddYears(-120))
+                ModelState.AddModelError("FechaNacimiento",
+                    "Ingresa una fecha de nacimiento válida.");
+        }
 
 
         // ════════════════════════════════════════════════════════
@@ -118,7 +136,11 @@ namespace ManoloCRM.Controllers
 
             // Validar que no exista otro contacto con la misma cédula
             if (await _context.Contactos.AnyAsync(c => c.Cedula == contacto.Cedula))
-                ModelState.AddModelError("Cedula", "Ya existe un contacto con esa cédula.");
+                ModelState.AddModelError("Cedula",
+                    "Ya existe un contacto con esa cédula.");
+
+            // Validar que la fecha de nacimiento sea razonable
+            ValidarFecha(contacto.FechaNacimiento);
 
             if (ModelState.IsValid)
             {
@@ -167,7 +189,11 @@ namespace ManoloCRM.Controllers
 
             // Validar cédula duplicada excluyendo el contacto actual
             if (await _context.Contactos.AnyAsync(c => c.Cedula == contacto.Cedula && c.Id != id))
-                ModelState.AddModelError("Cedula", "Ya existe otro contacto con esa cédula.");
+                ModelState.AddModelError("Cedula",
+                    "Ya existe otro contacto con esa cédula.");
+
+            // Validar que la fecha de nacimiento sea razonable
+            ValidarFecha(contacto.FechaNacimiento);
 
             if (ModelState.IsValid)
             {

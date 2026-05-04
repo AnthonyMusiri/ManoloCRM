@@ -12,40 +12,51 @@ namespace ManoloCRM.Models
     public class Contacto
     {
         // ── CLAVE PRIMARIA ────────────────────────────────────
-        // Entity Framework la reconoce automáticamente como
-        // clave primaria por llamarse "Id" - se autoincrementa
         public int Id { get; set; }
 
         // ── CÉDULA ────────────────────────────────────────────
-        // Campo obligatorio, máximo 20 caracteres
-        // Se valida en el servidor que no esté duplicada
+        // Solo números, mínimo 6 y máximo 20 dígitos
         [Required(ErrorMessage = "La cédula es obligatoria")]
-        [StringLength(20)]
+        [StringLength(20, MinimumLength = 6,
+            ErrorMessage = "La cédula debe tener entre 6 y 20 dígitos")]
+        [RegularExpression(@"^\d+$",
+            ErrorMessage = "La cédula solo puede contener números")]
         [Display(Name = "Cédula")]
         public string Cedula { get; set; } = string.Empty;
 
         // ── NOMBRE ────────────────────────────────────────────
+        // Solo letras y espacios, sin números ni caracteres especiales
         [Required(ErrorMessage = "El nombre es obligatorio")]
         [StringLength(100)]
+        [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$",
+            ErrorMessage = "El nombre solo puede contener letras")]
         [Display(Name = "Nombre")]
         public string Nombre { get; set; } = string.Empty;
 
         // ── APELLIDOS ─────────────────────────────────────────
+        // Solo letras y espacios, sin números ni caracteres especiales
         [Required(ErrorMessage = "Los apellidos son obligatorios")]
         [StringLength(100)]
+        [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$",
+            ErrorMessage = "Los apellidos solo pueden contener letras")]
         [Display(Name = "Apellidos")]
         public string Apellidos { get; set; } = string.Empty;
 
         // ── FECHA DE NACIMIENTO ───────────────────────────────
-        // Se guarda en la BD y se usa para calcular la edad
+        // Debe ser una fecha pasada, no futura ni absurda
+        // Mínimo: año 1900 | Máximo: hoy
         [Required(ErrorMessage = "La fecha de nacimiento es obligatoria")]
         [Display(Name = "Fecha de Nacimiento")]
         [DataType(DataType.Date)]
         public DateTime FechaNacimiento { get; set; }
 
         // ── TELÉFONO ──────────────────────────────────────────
+        // Solo números, espacios y guiones, mínimo 7 dígitos
         [Required(ErrorMessage = "El teléfono es obligatorio")]
-        [StringLength(20)]
+        [StringLength(20, MinimumLength = 7,
+            ErrorMessage = "El teléfono debe tener mínimo 7 dígitos")]
+        [RegularExpression(@"^[\d\s\-\+]+$",
+            ErrorMessage = "El teléfono solo puede contener números")]
         [Display(Name = "Teléfono")]
         public string Telefono { get; set; } = string.Empty;
 
@@ -55,11 +66,9 @@ namespace ManoloCRM.Models
         [Display(Name = "Dirección")]
         public string Direccion { get; set; } = string.Empty;
 
-        // ── EDAD (CALCULADA) ──────────────────────────────────
-        // [NotMapped] indica que este campo NO se guarda en la BD
-        // Se calcula automáticamente cada vez que se consulta
-        // Algoritmo: año actual - año nacimiento, con ajuste si
-        // el cumpleaños de este año todavía no ha llegado
+        // ── EDAD ──────────────────────────────────
+        // [NotMapped] = NO se guarda en la BD
+        // Se calcula desde FechaNacimiento cada vez que se consulta
         [NotMapped]
         [Display(Name = "Edad")]
         public int Edad
@@ -68,20 +77,13 @@ namespace ManoloCRM.Models
             {
                 var hoy  = DateTime.Today;
                 var edad = hoy.Year - FechaNacimiento.Year;
-
-                // Si aún no ha cumplido años este año, restar 1
-                // Ejemplo: nació el 15-dic-1990 y hoy es mayo-2025
-                // → 2025 - 1990 = 35, pero aún no cumple → devuelve 34
                 if (FechaNacimiento.Date > hoy.AddYears(-edad))
                     edad--;
-
                 return edad;
             }
         }
 
-        // ── NOMBRE COMPLETO  ───────────────────────
-        // [NotMapped] - tampoco se guarda en la BD
-        // Propiedad de conveniencia para mostrar en vistas y tabla
+        // ── NOMBRE COMPLETO ───────────────────────
         [NotMapped]
         public string NombreCompleto => $"{Nombre} {Apellidos}";
     }
